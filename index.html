@@ -73,9 +73,6 @@
       <div id="modelo" style="margin-top:8px;font-size:14px;color:#555"></div>
       <button class="btn-sec" onclick="mostrarGate()">Cambiar camión</button>
 
-      <label for="turno">Turno</label>
-      <select id="turno" onchange="actualizar()"></select>
-
       <label for="legajo">Tu legajo</label>
       <input id="legajo" inputmode="numeric" autocomplete="off" oninput="actualizar()" onchange="buscarLegajo()">
       <div id="lmsg" class="err"></div>
@@ -139,10 +136,6 @@ async function iniciar() {
 }
 
 function armarFormulario() {
-  const selT = document.getElementById('turno');
-  selT.innerHTML = '<option value="">Elegí turno</option>' +
-    CFG.turnos.map(t => '<option value="' + t + '">' + t + '</option>').join('');
-
   const res = document.getElementById('resultados');
   res.innerHTML = Object.keys(CFG.resultados).map(k =>
     '<label><input type="radio" name="res" value="' + k + '" onchange="setResultado(\'' + k + '\')"> ' + CFG.resultados[k] + '</label>'
@@ -233,14 +226,13 @@ function setResultado(k) {
 function actualizar() {
   const p = normPatente(document.getElementById('patente').value);
   const valido = !!CFG && CFG.trucks.some(t => t.patente === p);
-  const turno = document.getElementById('turno').value;
   const legajo = document.getElementById('legajo').value.trim();
   const respondidos = CFG ? CFG.items.filter(i => estado.items[i.id]).length : 0;
   const total = CFG ? CFG.items.length : 45;
 
   document.getElementById('progreso').textContent = 'Ítems respondidos: ' + respondidos + ' / ' + total;
 
-  const completo = valido && turno && /^\d{1,8}$/.test(legajo) && estado.persona &&
+  const completo = valido && /^\d{1,8}$/.test(legajo) && estado.persona &&
     estado.resultado && respondidos === total;
   document.getElementById('enviar').disabled = !completo;
 }
@@ -251,7 +243,6 @@ async function enviar() {
   btn.disabled = true; btn.textContent = 'Enviando...';
   const datos = {
     patente: document.getElementById('patente').value,
-    turno: document.getElementById('turno').value,
     legajo: document.getElementById('legajo').value.trim(),
     nombre: document.getElementById('nombre').value.trim(),
     resultado: estado.resultado,
@@ -282,7 +273,6 @@ async function enviar() {
 
 function reiniciar() {
   estado = { items: {}, resultado: null, persona: false };
-  document.getElementById('turno').value = '';
   document.getElementById('comentarios').value = '';
   document.querySelectorAll('input[name=res]').forEach(r => r.checked = false);
   document.querySelectorAll('.botones button.sel').forEach(b => b.classList.remove('sel'));
